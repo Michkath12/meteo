@@ -1,17 +1,24 @@
 <template>
-  <div class="relative w-full">
+  <div class="relative w-full max-w-2xl mx-auto">
    
     <div class="relative">
       
-      <div class="flex items-center border border-gray-300 rounded-lg bg-white">
+      <!-- Search Input Container -->
+      <div class="group relative flex items-center bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border-2 border-transparent focus-within:border-blue-500 focus-within:shadow-2xl overflow-hidden">
         
-        <div class="pl-3 pr-2">
-          <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <!-- Search Icon -->
+        <div class="pl-5 pr-3">
+          <svg 
+            class="w-6 h-6 text-gray-400 group-focus-within:text-blue-500 transition-colors duration-300" 
+            fill="none" 
+            stroke="currentColor" 
+            viewBox="0 0 24 24"
+          >
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
         </div>
         
-        
+        <!-- Input Field -->
         <input
           ref="searchInput"
           v-model="searchText"
@@ -19,25 +26,36 @@
           @focus="showDropdown = true"
           type="text"
           :placeholder="placeholder"
-          class="w-full py-3 px-2 outline-none text-gray-700 placeholder-gray-400"
+          class="flex-1 py-4 px-2 outline-none text-gray-800 placeholder-gray-400 bg-transparent text-lg font-medium"
         />
         
-        <!-- Indicateur de recherche en cours -->
-        <div v-if="isSearching" class="pr-3 pl-2">
-          <svg class="animate-spin h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        <!-- Clear Button -->
+        <button
+          v-if="searchText && !isSearching"
+          @click="clearSelection"
+          class="px-2 text-gray-400 hover:text-gray-600 transition-colors duration-200"
+          title="Effacer"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
           </svg>
+        </button>
+        
+        <!-- Search Loading Indicator -->
+        <div v-if="isSearching" class="px-4">
+          <div class="relative">
+            <div class="w-6 h-6 border-3 border-blue-200 border-t-blue-500 rounded-full animate-spin"></div>
+          </div>
         </div>
         
-        <!-- Flèche du select -->
+        <!-- Dropdown Arrow -->
         <button
           v-else
           @click="toggleDropdown"
-          class="pr-3 pl-2 border-l border-gray-300 text-gray-400 hover:text-gray-600"
+          class="px-5 py-2 text-gray-400 hover:text-blue-500 transition-all duration-200 border-l-2 border-gray-100"
         >
           <svg 
-            class="w-5 h-5 transition-transform duration-200" 
+            class="w-5 h-5 transition-transform duration-300" 
             :class="{ 'rotate-180': showDropdown }"
             fill="none" 
             stroke="currentColor" 
@@ -48,48 +66,97 @@
         </button>
       </div>
       
-      <!-- Loading indicator initial -->
-      <div 
-        v-if="loading" 
-        class="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg"
-      >
-        <div class="px-4 py-3 text-gray-500 text-center">
-          Chargement des données...
-        </div>
-      </div>
-      
-      <!-- Dropdown avec suggestions -->
-      <div 
-        v-if="showDropdown && !loading && filteredOptions.length > 0" 
-        class="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto"
-      >
+      <!-- Initial Loading State -->
+      <transition name="fade">
         <div 
-          v-for="option in filteredOptions" 
-          :key="option.id"
-          @click="selectOption(option)"
-          class="px-4 py-3 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-b-0 transition-colors duration-150"
-          :class="{ 'bg-blue-50': selectedItem?.id === option.id }"
+          v-if="loading" 
+          class="absolute z-20 w-full mt-3 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden"
         >
-          <div class="font-medium text-gray-900">{{ option.name }}</div>
-          <div class="text-sm text-gray-600">
-            <span v-if="option.state">{{ option.state }}, </span>
-            <span>{{ option.country }}</span>
-          </div>
-          <div class="text-xs text-gray-500 mt-1">
-            Lat: {{ option.coord.lat.toFixed(4) }}, Lon: {{ option.coord.lon.toFixed(4) }}
+          <div class="px-6 py-8 text-center">
+            <div class="inline-block w-10 h-10 border-4 border-blue-200 border-t-blue-500 rounded-full animate-spin mb-3"></div>
+            <p class="text-gray-600 font-medium">Chargement des données...</p>
           </div>
         </div>
-      </div>
+      </transition>
       
-      <!-- Message si aucun résultat -->
-      <div 
-        v-if="showDropdown && !loading && !isSearching && searchText && filteredOptions.length === 0" 
-        class="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg"
-      >
-        <div class="px-4 py-3 text-gray-500 text-center">
-          Aucun résultat pour "{{ searchText }}"
+      <!-- Dropdown with Suggestions -->
+      <transition name="slide-fade">
+        <div 
+          v-if="showDropdown && !loading && filteredOptions.length > 0" 
+          class="absolute z-20 w-full mt-3 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden"
+        >
+          <div class="max-h-96 overflow-y-auto custom-scrollbar">
+            <div 
+              v-for="(option, index) in filteredOptions" 
+              :key="option.id"
+              @click="selectOption(option)"
+              class="group px-6 py-4 hover:bg-linear-to-r hover:from-blue-50 hover:to-indigo-50 cursor-pointer border-b border-gray-50 last:border-b-0 transition-all duration-200"
+              :class="{ 
+                'bg-linear-to-r from-blue-50 to-indigo-50': selectedItem?.id === option.id,
+                'animate-fade-in': index < 10
+              }"
+              :style="{ animationDelay: `${index * 30}ms` }"
+            >
+              <div class="flex items-start justify-between">
+                <div class="flex-1">
+                  <div class="flex items-center gap-2 mb-1">
+                    <h3 class="font-semibold text-gray-900 text-lg group-hover:text-blue-600 transition-colors duration-200">
+                      {{ option.name }}
+                    </h3>
+                    <span 
+                      v-if="selectedItem?.id === option.id"
+                      class="inline-flex items-center justify-center w-5 h-5 bg-blue-500 rounded-full"
+                    >
+                      <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                      </svg>
+                    </span>
+                  </div>
+                  <div class="flex items-center gap-2 text-sm text-gray-600 mb-2">
+                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <span v-if="option.state" class="font-medium">{{ option.state }}, </span>
+                    <span>{{ option.country }}</span>
+                  </div>
+                  <div class="flex items-center gap-3 text-xs text-gray-500">
+                    <span class="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 rounded-lg group-hover:bg-white transition-colors duration-200">
+                      <span class="font-mono">{{ option.coord.lat.toFixed(4) }}°</span>
+                    </span>
+                    <span class="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 rounded-lg group-hover:bg-white transition-colors duration-200">
+                      <span class="font-mono">{{ option.coord.lon.toFixed(4) }}°</span>
+                    </span>
+                  </div>
+                </div>
+                <div class="ml-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                  <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
+      </transition>
+      
+      <!-- No Results Message -->
+      <transition name="fade">
+        <div 
+          v-if="showDropdown && !loading && !isSearching && searchText && filteredOptions.length === 0" 
+          class="absolute z-20 w-full mt-3 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden"
+        >
+          <div class="px-6 py-8 text-center">
+            <div class="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-4">
+              <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div>
+            <p class="text-gray-600 font-medium mb-1">Aucun résultat trouvé</p>
+            <p class="text-gray-500 text-sm">pour "{{ searchText }}"</p>
+          </div>
+        </div>
+      </transition>
     </div>
   </div>
 </template>
@@ -109,11 +176,11 @@ const props = defineProps({
   },
   debounceDelay: {
     type: Number,
-    default: 300 // Délai en millisecondes avant de lancer la recherche
+    default: 300
   },
   minSearchLength: {
     type: Number,
-    default: 0 // Nombre minimum de caractères avant de filtrer (0 = pas de minimum)
+    default: 0
   }
 })
 
@@ -131,7 +198,7 @@ const isSearching = ref(false)
 const filteredOptions = ref([])
 const debounceTimer = ref(null)
 
-// Fonction pour normaliser le texte (enlever les accents)
+// Fonction pour normaliser le texte
 const normalizeText = (text) => {
   return text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
 }
@@ -139,10 +206,8 @@ const normalizeText = (text) => {
 // Fonction de filtrage asynchrone
 const performAsyncFilter = async (searchTerm) => {
   return new Promise((resolve) => {
-    // Simuler un traitement asynchrone (utile pour de grandes listes)
     setTimeout(() => {
       if (!searchTerm.trim()) {
-        // Si pas de recherche, retourner les 50 premiers
         resolve(cities.value.slice(0, 50))
       } else {
         const normalizedSearch = normalizeText(searchTerm)
@@ -151,31 +216,26 @@ const performAsyncFilter = async (searchTerm) => {
           normalizeText(city.country).includes(normalizedSearch) ||
           (city.state && normalizeText(city.state).includes(normalizedSearch))
         )
-        // Limiter les résultats pour les performances
         resolve(filtered.slice(0, 100))
       }
     }, 0) // Utiliser 0 pour permettre au thread principal de respirer
   })
 }
 
-// Fonction de debounce pour le filtrage
+// Fonction de debounce
 const debouncedFilter = async (searchTerm) => {
-  // Annuler le timer précédent s'il existe
   if (debounceTimer.value) {
     clearTimeout(debounceTimer.value)
   }
 
-  // Vérifier la longueur minimale de recherche
   if (props.minSearchLength > 0 && searchTerm.length > 0 && searchTerm.length < props.minSearchLength) {
     filteredOptions.value = []
     isSearching.value = false
     return
   }
 
-  // Indiquer que la recherche est en cours
   isSearching.value = true
 
-  // Créer un nouveau timer
   debounceTimer.value = setTimeout(async () => {
     try {
       const results = await performAsyncFilter(searchTerm)
@@ -189,12 +249,12 @@ const debouncedFilter = async (searchTerm) => {
   }, props.debounceDelay)
 }
 
-// Watcher pour le texte de recherche
+// Watcher
 watch(searchText, (newValue) => {
   debouncedFilter(newValue)
 })
 
-// Chargement des données JSON
+// Chargement des données
 const loadCities = async () => {
   loading.value = true
   try {
@@ -204,8 +264,6 @@ const loadCities = async () => {
     }
     const data = await response.json()
     cities.value = Array.isArray(data) ? data : [data]
-    
-    // Initialiser les options filtrées avec les premières villes
     filteredOptions.value = cities.value.slice(0, 50)
   } catch (error) {
     console.error('Erreur:', error)
@@ -216,13 +274,13 @@ const loadCities = async () => {
   }
 }
 
-// Gestion de l'input de recherche
+// Gestion de l'input
 const handleSearchInput = () => {
   emit('search', searchText.value)
   showDropdown.value = true
 }
 
-// Sélection d'une option
+// Sélection
 const selectOption = (item) => {
   selectedItem.value = item
   searchText.value = item.name
@@ -230,7 +288,7 @@ const selectOption = (item) => {
   emit('select', item)
 }
 
-// Toggle du dropdown
+// Toggle dropdown
 const toggleDropdown = () => {
   showDropdown.value = !showDropdown.value
   if (showDropdown.value) {
@@ -238,21 +296,22 @@ const toggleDropdown = () => {
   }
 }
 
-// Effacer la sélection
+// Effacer
 const clearSelection = () => {
   selectedItem.value = null
   searchText.value = ''
+  filteredOptions.value = cities.value.slice(0, 50)
   emit('clear')
 }
 
-// Fermer le dropdown en cliquant à l'extérieur
+// Click outside
 const handleClickOutside = (event) => {
   if (!event.target.closest('.relative')) {
     showDropdown.value = false
   }
 }
 
-// Écouteur d'événement pour clic extérieur
+// Lifecycle
 onMounted(() => {
   document.addEventListener('click', handleClickOutside)
   loadCities()
@@ -260,9 +319,72 @@ onMounted(() => {
 
 onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside)
-  // Nettoyer le timer si le composant est démonté
   if (debounceTimer.value) {
     clearTimeout(debounceTimer.value)
   }
 })
 </script>
+
+<style scoped>
+/* Custom Scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Animations */
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.fade-enter-from, .fade-leave-to {
+  opacity: 0;
+}
+
+.slide-fade-enter-active {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.slide-fade-leave-active {
+  transition: all 0.2s cubic-bezier(0.4, 0, 1, 1);
+}
+
+.slide-fade-enter-from {
+  transform: translateY(-10px);
+  opacity: 0;
+}
+
+.slide-fade-leave-to {
+  transform: translateY(-5px);
+  opacity: 0;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out forwards;
+  opacity: 0;
+}
+</style>
