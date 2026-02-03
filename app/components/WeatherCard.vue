@@ -15,9 +15,9 @@
         <div class="flex items-start justify-between mb-6">
           <div class="flex-1">
             <h2 class="location-title">
-              {{ weather.name }}
+              {{ weather?.name || 'Ville inconnue' }}
             </h2>
-            <p class="location-country">
+            <p class="location-country" v-if="weather?.sys?.country">
               <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -27,13 +27,13 @@
           </div>
           
           <!-- Icône météo principale -->
-          <div class="weather-icon-main">
-            <component :is="getWeatherIconComponent(weather.weather?.[0]?.main)" class="weather-svg-icon" />
+          <div class="weather-icon-main" v-if="weather?.weather?.[0]?.main">
+            <component :is="getWeatherIconComponent(weather.weather[0].main)" class="weather-svg-icon" />
           </div>
         </div>
 
         <!-- Température principale -->
-        <div class="temperature-main">
+        <div class="temperature-main" v-if="weather?.main">
           <div class="flex items-baseline gap-2">
             <span class="text-6xl font-bold text-gray-900">{{ Math.round(weather.main.temp) }}</span>
             <span class="text-3xl font-light text-gray-500">°C</span>
@@ -49,7 +49,7 @@
       <div class="divider"></div>
 
       <!-- Informations détaillées -->
-      <div class="weather-details">
+      <div class="weather-details" v-if="weather?.main">
         <!-- Température Min/Max -->
         <div class="detail-card highlight">
           <div class="detail-icon">
@@ -68,7 +68,7 @@
         </div>
 
         <!-- Vent -->
-        <div class="detail-card">
+        <div class="detail-card" v-if="weather?.wind">
           <div class="detail-icon">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
@@ -82,7 +82,7 @@
         </div>
 
         <!-- Humidité -->
-        <div class="detail-card">
+        <div class="detail-card" v-if="weather?.main?.humidity !== undefined">
           <div class="detail-icon">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
@@ -95,7 +95,7 @@
         </div>
 
         <!-- Pression -->
-        <div class="detail-card">
+        <div class="detail-card" v-if="weather?.main?.pressure !== undefined">
           <div class="detail-icon">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
@@ -108,7 +108,7 @@
         </div>
 
         <!-- Visibilité -->
-        <div class="detail-card" v-if="weather.visibility">
+        <div class="detail-card" v-if="weather?.visibility">
           <div class="detail-icon">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -122,7 +122,7 @@
         </div>
 
         <!-- Nuages -->
-        <div class="detail-card" v-if="weather.clouds?.all !== undefined">
+        <div class="detail-card" v-if="weather?.clouds?.all !== undefined">
           <div class="detail-icon">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
@@ -139,7 +139,7 @@
       <div class="divider"></div>
 
       <!-- Lever/Coucher du soleil -->
-      <div class="sun-times">
+      <div class="sun-times" v-if="weather?.sys">
         <div class="sun-card">
           <div class="sun-icon sunrise">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -172,6 +172,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import type { Component } from 'vue'
 
 interface WeatherData {
   name: string
@@ -205,16 +206,19 @@ interface WeatherData {
 }
 
 const props = defineProps<{
-  weather: WeatherData
+  weather: WeatherData | null
 }>()
 
 const localTime = computed(() => {
-  const utcTime = props.weather.dt * 1000
-  const timezoneOffset = props.weather.timezone * 1000
+  if (!props.weather?.dt || !props.weather?.timezone) return '--:--'
+  
+  const utcSeconds = props.weather.dt + props.weather.timezone
+  const date = new Date(utcSeconds * 1000)
 
-  return new Date(utcTime + timezoneOffset).toLocaleTimeString('fr-FR', {
+  return date.toLocaleTimeString('fr-FR', {
     hour: '2-digit',
-    minute: '2-digit'
+    minute: '2-digit',
+    timeZone: 'UTC'
   })
 })
 
@@ -225,7 +229,7 @@ const formatTime = (timestamp: number) => {
 }
 
 // Composants d'icônes SVG pour chaque type de météo
-const SunIcon = {
+const SunIcon: Component = {
   template: `
     <svg class="w-20 h-20 text-yellow-400" fill="currentColor" viewBox="0 0 24 24">
       <circle cx="12" cy="12" r="5" class="animate-pulse"/>
@@ -234,7 +238,7 @@ const SunIcon = {
   `
 }
 
-const CloudIcon = {
+const CloudIcon: Component = {
   template: `
     <svg class="w-20 h-20 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
       <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/>
@@ -242,7 +246,7 @@ const CloudIcon = {
   `
 }
 
-const RainIcon = {
+const RainIcon: Component = {
   template: `
     <svg class="w-20 h-20 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"/>
@@ -251,7 +255,7 @@ const RainIcon = {
   `
 }
 
-const ThunderstormIcon = {
+const ThunderstormIcon: Component = {
   template: `
     <svg class="w-20 h-20 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"/>
@@ -260,7 +264,7 @@ const ThunderstormIcon = {
   `
 }
 
-const SnowIcon = {
+const SnowIcon: Component = {
   template: `
     <svg class="w-20 h-20 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"/>
@@ -271,7 +275,7 @@ const SnowIcon = {
   `
 }
 
-const MistIcon = {
+const MistIcon: Component = {
   template: `
     <svg class="w-20 h-20 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 8h12M4 12h16M4 16h10" opacity="0.6"/>
@@ -280,7 +284,7 @@ const MistIcon = {
   `
 }
 
-const DrizzleIcon = {
+const DrizzleIcon: Component = {
   template: `
     <svg class="w-20 h-20 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"/>
@@ -293,7 +297,7 @@ const DrizzleIcon = {
 const getWeatherIconComponent = (condition?: string) => {
   if (!condition) return CloudIcon
   
-  const iconMap: Record<string, any> = {
+  const iconMap: Record<string, Component> = {
     'Clear': SunIcon,
     'Clouds': CloudIcon,
     'Rain': RainIcon,

@@ -1,529 +1,444 @@
 <template>
   <footer class="weather-footer">
-    <!-- Gradient Separator -->
-    <div class="footer-separator"></div>
-    
-    <div class="footer-container">
-      <!-- Brand & Description Section -->
-      <div class="footer-section footer-brand">
-        <div class="brand-wrapper">
-          <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
-            <circle cx="12" cy="12" r="3"/>
+   
+    <div class="footer-content">
+      
+      <!-- Section informations météo -->
+      <div class="footer-section" v-if="weather">
+        <div class="weather-info">
+          <h3 class="section-title">
+            <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                    d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+            </svg>
+            Informations météo
+          </h3>
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="info-label">Ville :</span>
+              <span class="info-value">{{ weather.name }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Température :</span>
+              <span class="info-value">{{ Math.round(weather.main?.temp) }}°C</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Conditions :</span>
+              <span class="info-value">{{ weather.weather?.[0]?.description }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Humidité :</span>
+              <span class="info-value">{{ weather.main?.humidity }}%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section liens rapides -->
+      <div class="footer-section">
+        <h3 class="section-title">
+          <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
           </svg>
-          <h3 class="brand-name">WeatherPro</h3>
+          Navigation
+        </h3>
+        <ul class="link-list">
+          <li><a href="#" class="footer-link" @click.prevent="scrollToTop">
+            <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 11l7-7 7 7M5 19l7-7 7 7"/>
+            </svg>
+            Haut de page
+          </a></li>
+          <li><a href="#" class="footer-link" @click.prevent="refreshWeather">
+            <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+            </svg>
+            Actualiser
+          </a></li>
+          <li><a href="#" class="footer-link" @click.prevent="toggleUnits">
+            <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+            </svg>
+            °C / °F
+          </a></li>
+        </ul>
+      </div>
+
+      <!-- Section sources -->
+      <div class="footer-section">
+        <h3 class="section-title">
+          <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                  d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/>
+          </svg>
+          Sources
+        </h3>
+        <div class="source-info">
+          <p class="text-sm mb-2 text-white">Données météorologiques fournies par</p>
+          <div class="flex items-center space-x-3">
+            <div class="api-badge">OpenWeatherMap</div>
+            <div class="api-badge">API</div>
+          </div>
         </div>
-        <p class="brand-description">
-          Prévisions météorologiques précises et données climatiques en temps réel 
-          pour vous aider à planifier votre journée en toute confiance.
-        </p>
-        <div class="data-sources">
-          <span class="source-badge">Données certifiées</span>
-          <span class="source-badge">Mises à jour en temps réel</span>
+      </div>
+
+      <!-- Section contact/social -->
+      <div class="footer-section">
+        <h3 class="section-title">
+          <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                  d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"/>
+          </svg>
+          Contact
+        </h3>
+        <div class="contact-info">
+          <p class="text-sm mb-3 text-white">Pour toute question ou suggestion :</p>
+          <div class="flex space-x-3">
+            <a href="mailto:contact@meteo-app.fr" class="contact-link">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                      d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+              </svg>
+            </a>
+            <a href="https://github.com" target="_blank" class="contact-link">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+              </svg>
+            </a>
+            <a href="https://twitter.com" target="_blank" class="contact-link">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M23 3a10.9 10.9 0 01-3.14 1.53 4.48 4.48 0 00-7.86 3v1A10.66 10.66 0 013 4s-4 9 5 13a11.64 11.64 0 01-7 2c9 5 20 0 20-11.5a4.5 4.5 0 00-.08-.83A7.72 7.72 0 0023 3z"/>
+              </svg>
+            </a>
+          </div>
         </div>
       </div>
 
-      <!-- Quick Links -->
-      <div class="footer-section">
-        <h4 class="section-title">Navigation</h4>
-        <nav class="footer-nav">
-          <NuxtLink to="/" class="footer-link">Accueil</NuxtLink>
-          <NuxtLink to="/previsions" class="footer-link">Prévisions</NuxtLink>
-          <NuxtLink to="/radar" class="footer-link">Radar météo</NuxtLink>
-          <NuxtLink to="/alertes" class="footer-link">Alertes</NuxtLink>
-          <NuxtLink to="/cartes" class="footer-link">Cartes interactives</NuxtLink>
-        </nav>
-      </div>
-
-      <!-- Resources -->
-      <div class="footer-section">
-        <h4 class="section-title">Ressources</h4>
-        <nav class="footer-nav">
-          <NuxtLink to="/api" class="footer-link">API Développeurs</NuxtLink>
-          <NuxtLink to="/blog" class="footer-link">Blog météo</NuxtLink>
-          <NuxtLink to="/education" class="footer-link">Comprendre la météo</NuxtLink>
-          <NuxtLink to="/faq" class="footer-link">FAQ</NuxtLink>
-          <NuxtLink to="/support" class="footer-link">Support technique</NuxtLink>
-        </nav>
-      </div>
-
-      <!-- Contact & Legal -->
-      <div class="footer-section">
-        <h4 class="section-title">Informations</h4>
-        <nav class="footer-nav">
-          <NuxtLink to="/about" class="footer-link">À propos</NuxtLink>
-          <NuxtLink to="/contact" class="footer-link">Contact</NuxtLink>
-          <NuxtLink to="/privacy" class="footer-link">Confidentialité</NuxtLink>
-          <NuxtLink to="/terms" class="footer-link">Conditions d'utilisation</NuxtLink>
-          <NuxtLink to="/accessibility" class="footer-link">Accessibilité</NuxtLink>
-        </nav>
-      </div>
     </div>
 
-    <!-- Weather Data Info Bar -->
-    <div class="data-info-bar">
-      <div class="data-info-container">
-        <div class="info-item">
-          <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10"/>
-            <polyline points="12 6 12 12 16 14"/>
-          </svg>
-          <span>Dernière mise à jour: <strong>{{ lastUpdate }}</strong></span>
-        </div>
-        <div class="info-item">
-          <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-            <circle cx="12" cy="10" r="3"/>
-          </svg>
-          <span>Sources: <strong>Météo France, ECMWF, NOAA</strong></span>
-        </div>
-        <div class="info-item">
-          <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
-          </svg>
-          <span>Précision: <strong>98.5%</strong></span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Bottom Bar -->
+    <!-- Barre du bas -->
     <div class="footer-bottom">
-      <div class="bottom-container">
-        <div class="copyright">
-          <p>© {{ currentYear }} WeatherPro. Tous droits réservés.</p>
-        </div>
-        
-        <div class="social-links">
-          <a href="https://twitter.com" target="_blank" rel="noopener" class="social-link" aria-label="Twitter">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-            </svg>
-          </a>
-          <a href="https://facebook.com" target="_blank" rel="noopener" class="social-link" aria-label="Facebook">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-              <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-            </svg>
-          </a>
-          <a href="https://instagram.com" target="_blank" rel="noopener" class="social-link" aria-label="Instagram">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-            </svg>
-          </a>
-          <a href="https://linkedin.com" target="_blank" rel="noopener" class="social-link" aria-label="LinkedIn">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-              <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
-            </svg>
-          </a>
-        </div>
-
-        <div class="language-selector">
-          <select class="language-select" aria-label="Sélectionner la langue">
-            <option value="fr">🇫🇷 Français</option>
-            <option value="en">🇬🇧 English</option>
-            <option value="es">🇪🇸 Español</option>
-            <option value="de">🇩🇪 Deutsch</option>
-          </select>
+      <div class="container mx-auto px-4">
+        <div class="flex flex-col md:flex-row justify-between items-center">
+          <div class="mb-4 md:mb-0">
+            <div class="flex items-center">
+              <svg class="w-6 h-6 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                      d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"/>
+              </svg>
+              <span class="text-lg font-semibold bg-linear-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent">
+                Météo<span class="font-bold">App</span>
+              </span>
+            </div>
+          </div>
+          
+          <div class="flex items-center space-x-4">
+            <span class="text-sm">Heure locale : {{ currentTime }}</span>
+            <span class="text-sm">|</span>
+            <span class="text-sm">Dernière mise à jour : {{ lastUpdate }}</span>
+          </div>
+          
+          <div class="mt-4 md:mt-0">
+            <p class="text-xs text-gray-400">
+              © {{ currentYear }} MétéoApp. Tous droits réservés.
+              <span class="block md:inline">Données météorologiques mises à jour en temps réel.</span>
+            </p>
+          </div>
         </div>
       </div>
     </div>
   </footer>
 </template>
 
-<script setup>
-import { ref, computed, onMounted } from 'vue';
+<script setup lang="ts">
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 
-// Reactive data
-const lastUpdate = ref('--:--');
-const currentYear = computed(() => new Date().getFullYear());
-
-// Update time on mount
-onMounted(() => {
-  updateLastUpdateTime();
-  // Update every minute
-  setInterval(updateLastUpdateTime, 60000);
-});
-
-function updateLastUpdateTime() {
-  const now = new Date();
-  lastUpdate.value = now.toLocaleTimeString('fr-FR', { 
-    hour: '2-digit', 
-    minute: '2-digit' 
-  });
+interface WeatherData {
+  name: string
+  main?: {
+    temp: number
+    humidity: number
+  }
+  weather?: Array<{
+    description: string
+  }>
 }
+
+const props = defineProps<{
+  weather: WeatherData | null
+}>()
+
+const emit = defineEmits<{
+  refresh: []
+  toggleUnits: []
+}>()
+
+// Références
+const currentTime = ref('')
+const lastUpdate = ref('')
+const currentYear = new Date().getFullYear()
+
+// Fonctions
+const scrollToTop = () => {
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+
+const refreshWeather = () => {
+  emit('refresh')
+  lastUpdate.value = new Date().toLocaleTimeString('fr-FR', {
+    hour: '2-digit',
+    minute: '2-digit'
+  })
+}
+
+const toggleUnits = () => {
+  emit('toggleUnits')
+}
+
+// Mettre à jour l'heure
+const updateTime = () => {
+  currentTime.value = new Date().toLocaleTimeString('fr-FR', {
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
+  })
+}
+
+// Lifecycle
+onMounted(() => {
+  // Initialiser l'heure
+  updateTime()
+  lastUpdate.value = new Date().toLocaleTimeString('fr-FR', {
+    hour: '2-digit',
+    minute: '2-digit'
+  })
+  
+  // Mettre à jour l'heure toutes les secondes
+  const timer = setInterval(updateTime, 1000)
+  
+  onUnmounted(() => {
+    clearInterval(timer)
+  })
+})
 </script>
 
 <style scoped>
 .weather-footer {
-  --footer-bg: #0a1628;
-  --footer-bg-secondary: #0f1f38;
-  --footer-text: #e2e8f0;
-  --footer-text-muted: #94a3b8;
-  --footer-accent: #3b82f6;
-  --footer-accent-hover: #60a5fa;
-  --footer-border: #1e293b;
-  
-  background: var(--footer-bg);
-  color: var(--footer-text);
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.95), rgba(248, 250, 252, 0.98));
+  backdrop-filter: blur(10px);
+  border-top: 1px solid rgba(226, 232, 240, 0.8);
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05);
+  margin-top: auto;
   position: relative;
-  overflow: hidden;
+  z-index: 20;
 }
 
-/* Gradient Separator */
-.footer-separator {
-  height: 4px;
-  background: linear-gradient(90deg, 
-    #3b82f6 0%, 
-    #8b5cf6 25%, 
-    #ec4899 50%, 
-    #f59e0b 75%, 
-    #10b981 100%
-  );
-  background-size: 200% 100%;
-  animation: gradientShift 8s ease infinite;
-}
-
-@keyframes gradientShift {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-}
-
-/* Main Container */
-.footer-container {
-  max-width: 1400px;
+.footer-content {
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 4rem 2rem 2rem;
+  padding: 2rem 1rem;
   display: grid;
-  grid-template-columns: 2fr repeat(3, 1fr);
-  gap: 3rem;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
 }
 
-/* Brand Section */
-.footer-brand {
-  padding-right: 2rem;
-}
-
-.brand-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 1.25rem;
-}
-
-.brand-icon {
-  width: 36px;
-  height: 36px;
-  color: var(--footer-accent);
-  filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.5));
-}
-
-.brand-name {
-  font-size: 1.75rem;
-  font-weight: 700;
-  margin: 0;
-  background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  letter-spacing: -0.02em;
-}
-
-.brand-description {
-  color: var(--footer-text-muted);
-  line-height: 1.7;
-  margin-bottom: 1.5rem;
-  font-size: 0.95rem;
-}
-
-.data-sources {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.source-badge {
-  background: var(--footer-bg-secondary);
-  border: 1px solid var(--footer-border);
-  padding: 0.4rem 0.9rem;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  color: var(--footer-text-muted);
-  transition: all 0.3s ease;
-}
-
-.source-badge:hover {
-  border-color: var(--footer-accent);
-  color: var(--footer-accent);
-  transform: translateY(-2px);
-}
-
-/* Footer Sections */
 .footer-section {
-  animation: fadeInUp 0.6s ease backwards;
-}
-
-.footer-section:nth-child(2) { animation-delay: 0.1s; }
-.footer-section:nth-child(3) { animation-delay: 0.2s; }
-.footer-section:nth-child(4) { animation-delay: 0.3s; }
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  padding: 0 1rem;
 }
 
 .section-title {
   font-size: 1rem;
   font-weight: 600;
-  margin-bottom: 1.25rem;
-  color: var(--footer-text);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  position: relative;
-  padding-bottom: 0.5rem;
-}
-
-.section-title::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  width: 30px;
-  height: 2px;
-  background: var(--footer-accent);
-}
-
-.footer-nav {
+  color: #1f2937;
+  margin-bottom: 1rem;
   display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.footer-link {
-  color: var(--footer-text-muted);
-  text-decoration: none;
-  font-size: 0.95rem;
-  transition: all 0.3s ease;
-  position: relative;
-  padding-left: 0;
-  display: inline-block;
-  width: fit-content;
-}
-
-.footer-link::before {
-  content: '';
-  position: absolute;
-  left: -12px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 4px;
-  height: 4px;
-  background: var(--footer-accent);
-  border-radius: 50%;
-  opacity: 0;
-  transition: all 0.3s ease;
-}
-
-.footer-link:hover {
-  color: var(--footer-accent);
-  padding-left: 12px;
-}
-
-.footer-link:hover::before {
-  opacity: 1;
-  left: 0;
-}
-
-/* Data Info Bar */
-.data-info-bar {
-  background: var(--footer-bg-secondary);
-  border-top: 1px solid var(--footer-border);
-  border-bottom: 1px solid var(--footer-border);
-  padding: 1.5rem 2rem;
-  margin-top: 2rem;
-}
-
-.data-info-container {
-  max-width: 1400px;
-  margin: 0 auto;
-  display: flex;
-  justify-content: space-around;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 2rem;
+}
+
+.info-grid {
+  display: grid;
+  gap: 0.5rem;
 }
 
 .info-item {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 0.75rem;
-  color: var(--footer-text-muted);
-  font-size: 0.9rem;
+  padding: 0.25rem 0;
+  border-bottom: 1px solid rgba(229, 231, 235, 0.5);
 }
 
-.info-icon {
-  width: 20px;
-  height: 20px;
-  color: var(--footer-accent);
+.info-label {
+  font-size: 0.875rem;
+  color: #6b7280;
+  font-weight: 500;
 }
 
-.info-item strong {
-  color: var(--footer-text);
+.info-value {
+  font-size: 0.875rem;
+  color: #374151;
   font-weight: 600;
 }
 
-/* Bottom Bar */
-.footer-bottom {
-  background: rgba(0, 0, 0, 0.3);
-  border-top: 1px solid var(--footer-border);
-  padding: 1.5rem 2rem;
+.link-list {
+  list-style: none;
+  padding: 0;
 }
 
-.bottom-container {
-  max-width: 1400px;
-  margin: 0 auto;
-  display: flex;
-  justify-content: space-between;
+.link-list li {
+  margin-bottom: 0.5rem;
+}
+
+.footer-link {
+  display: inline-flex;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 1.5rem;
+  font-size: 0.875rem;
+  color: #4b5563;
+  transition: all 0.2s;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
 }
 
-.copyright p {
-  color: var(--footer-text-muted);
-  font-size: 0.9rem;
-  margin: 0;
+.footer-link:hover {
+  color: #3b82f6;
+  background-color: rgba(59, 130, 246, 0.05);
+  transform: translateX(4px);
 }
 
-/* Social Links */
-.social-links {
-  display: flex;
-  gap: 1rem;
+.source-info {
+  padding: 0.5rem 0;
 }
 
-.social-link {
-  width: 40px;
-  height: 40px;
-  display: flex;
+.api-badge {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: var(--footer-bg-secondary);
-  border: 1px solid var(--footer-border);
+  padding: 0.25rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #2563eb;
+  background-color: rgba(37, 99, 235, 0.1);
+  border: 1px solid rgba(37, 99, 235, 0.2);
+  border-radius: 9999px;
+  transition: all 0.2s;
+}
+
+.api-badge:hover {
+  background-color: rgba(37, 99, 235, 0.15);
+  transform: translateY(-1px);
+}
+
+.contact-info {
+  padding: 0.5rem 0;
+}
+
+.contact-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
   border-radius: 50%;
-  color: var(--footer-text-muted);
-  transition: all 0.3s ease;
+  color: #6b7280;
+  background-color: rgba(243, 244, 246, 0.8);
+  transition: all 0.3s;
 }
 
-.social-link svg {
-  width: 18px;
-  height: 18px;
+.contact-link:hover {
+  color: #3b82f6;
+  background-color: rgba(59, 130, 246, 0.1);
+  transform: translateY(-2px) scale(1.1);
 }
 
-.social-link:hover {
-  background: var(--footer-accent);
-  border-color: var(--footer-accent);
-  color: white;
-  transform: translateY(-3px);
-  box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
+.footer-bottom {
+  background: linear-gradient(to right, rgba(59, 130, 246, 0.05), rgba(147, 197, 253, 0.05));
+  border-top: 1px solid rgba(226, 232, 240, 0.8);
+  padding: 1rem 0;
 }
 
-/* Language Selector */
-.language-selector {
-  position: relative;
+/* Animations */
+.footer-link,
+.contact-link,
+.api-badge {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.language-select {
-  background: var(--footer-bg-secondary);
-  border: 1px solid var(--footer-border);
-  color: var(--footer-text);
-  padding: 0.6rem 2.5rem 0.6rem 1rem;
-  border-radius: 8px;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394a3b8' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 0.8rem center;
-}
-
-.language-select:hover {
-  border-color: var(--footer-accent);
-}
-
-.language-select:focus {
-  outline: none;
-  border-color: var(--footer-accent);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-/* Responsive Design */
-@media (max-width: 1200px) {
-  .footer-container {
-    grid-template-columns: 2fr 1fr 1fr;
+/* Responsive */
+@media (max-width: 768px) {
+  .footer-content {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .footer-section {
+    padding: 0;
+    border-bottom: 1px solid rgba(229, 231, 235, 0.5);
+    padding-bottom: 1.5rem;
   }
   
   .footer-section:last-child {
-    grid-column: 1 / -1;
+    border-bottom: none;
+  }
+  
+  .footer-bottom .container {
+    text-align: center;
+  }
+  
+  .footer-bottom .flex {
+    flex-direction: column;
+    gap: 0.5rem;
   }
 }
 
-@media (max-width: 768px) {
-  .footer-container {
-    grid-template-columns: 1fr;
-    gap: 2.5rem;
-    padding: 3rem 1.5rem 2rem;
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .weather-footer {
+    background: linear-gradient(to bottom, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.98));
+    border-top: 1px solid rgba(51, 65, 85, 0.8);
   }
   
-  .footer-brand {
-    padding-right: 0;
+  .section-title {
+    color: #f1f5f9;
   }
   
-  .data-info-container {
-    flex-direction: column;
-    gap: 1.5rem;
+  .info-label {
+    color: #94a3b8;
   }
   
-  .info-item {
-    width: 100%;
-    justify-content: center;
+  .info-value {
+    color: #e2e8f0;
   }
   
-  .bottom-container {
-    flex-direction: column;
-    text-align: center;
-    gap: 1.5rem;
+  .footer-link {
+    color: #cbd5e1;
   }
   
-  .social-links {
-    justify-content: center;
-  }
-}
-
-@media (max-width: 480px) {
-  .footer-separator {
-    height: 3px;
+  .footer-link:hover {
+    color: #60a5fa;
+    background-color: rgba(96, 165, 250, 0.1);
   }
   
-  .brand-name {
-    font-size: 1.5rem;
+  .api-badge {
+    color: #93c5fd;
+    background-color: rgba(59, 130, 246, 0.2);
+    border-color: rgba(59, 130, 246, 0.3);
   }
   
-  .brand-icon {
-    width: 30px;
-    height: 30px;
+  .contact-link {
+    color: #94a3b8;
+    background-color: rgba(51, 65, 85, 0.8);
   }
   
-  .data-sources {
-    flex-direction: column;
+  .contact-link:hover {
+    color: #60a5fa;
+    background-color: rgba(96, 165, 250, 0.2);
   }
   
-  .source-badge {
-    text-align: center;
+  .footer-bottom {
+    background: linear-gradient(to right, rgba(30, 58, 138, 0.1), rgba(30, 64, 175, 0.1));
+    border-top: 1px solid rgba(51, 65, 85, 0.8);
   }
 }
 </style>

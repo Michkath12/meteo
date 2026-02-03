@@ -1,6 +1,3 @@
-<script setup>
-
-</script>
 
 <template>
   <div>
@@ -10,6 +7,12 @@
       
     </NuxtLayout>
     
-    
+    <Footer  />
   </div>
 </template>
+
+
+
+<script setup lang="ts">
+
+</script>
