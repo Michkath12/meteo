@@ -181,6 +181,10 @@ const props = defineProps({
   minSearchLength: {
     type: Number,
     default: 0
+  },
+  searchText: {
+    type: String,
+    default: ''
   }
 })
 
@@ -189,7 +193,13 @@ const emit = defineEmits(['select', 'search', 'clear'])
 
 // Références
 const searchInput = ref(null)
-const searchText = ref('')
+const searchText = ref(props.searchText)
+// Synchronise la prop searchText avec le champ d'input si elle change
+watch(() => props.searchText, (newVal) => {
+  if (newVal !== searchText.value) {
+    searchText.value = newVal
+  }
+})
 const showDropdown = ref(false)
 const selectedItem = ref(null)
 const cities = ref([])

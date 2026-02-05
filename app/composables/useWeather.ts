@@ -45,9 +45,29 @@ export const useWeather = () => {
       return null
     }
   }
+  const getForecast = async (city: string) => {
+    try {
+      const { data } = await axios.get(
+        'https://api.openweathermap.org/data/2.5/forecast',
+        {
+          params: {
+            q: city,
+            appid: '8d043095074d440b50496d98cf888ec9',
+            units: 'metric',
+            lang: 'fr'
+          }
+        }
+      )
+      return data
+    } catch (error) {
+      console.error('Erreur forecast:', error)
+      return null
+    }
+  }
 
   return {
     getWeather,
-    getWeatherByCoords
+    getWeatherByCoords,
+    getForecast
   }
 }

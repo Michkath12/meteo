@@ -166,6 +166,22 @@
           </div>
         </div>
       </div>
+
+      <!-- Bouton Voir les Prévisions -->
+      <div class="forecast-button-container">
+        <NuxtLink 
+          :to="{ path: '/previsions', query: { city: weather?.name } }" 
+          class="forecast-button"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+          <span>Voir les prévisions sur 5 jours</span>
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </NuxtLink>
+      </div>
     </div>
   </div>
 </template>
@@ -314,29 +330,6 @@ const getWeatherIconComponent = (condition?: string) => {
   }
   
   return iconMap[condition] || CloudIcon
-}
-
-// Obtenir l'icône météo appropriée (gardé pour compatibilité)
-const getWeatherIcon = (condition?: string): string => {
-  if (!condition) return '🌤️'
-  const icons: Record<string, string> = {
-    'Clear': '☀️',
-    'Clouds': '☁️',
-    'Rain': '🌧️',
-    'Drizzle': '🌦️',
-    'Thunderstorm': '⛈️',
-    'Snow': '❄️',
-    'Mist': '🌫️',
-    'Smoke': '🌫️',
-    'Haze': '🌫️',
-    'Dust': '🌫️',
-    'Fog': '🌫️',
-    'Sand': '🌫️',
-    'Ash': '🌫️',
-    'Squall': '💨',
-    'Tornado': '🌪️'
-  }
-  return icons[condition] || '🌤️'
 }
 
 // Obtenir la direction du vent
@@ -576,6 +569,40 @@ const getWindDirection = (deg?: number): string => {
   background: linear-gradient(to bottom, transparent, #d1d5db, transparent);
 }
 
+/* Bouton Prévisions */
+.forecast-button-container {
+  padding: 0 2rem 2rem;
+}
+
+.forecast-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 1rem 1.5rem;
+  background: linear-gradient(135deg, #3b82f6, #6366f1);
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 0.75rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  text-decoration: none;
+}
+
+.forecast-button:hover {
+  background: linear-gradient(135deg, #2563eb, #4f46e5);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+}
+
+.forecast-button:active {
+  transform: translateY(0);
+}
+
 /* Responsive */
 @media (max-width: 1024px) {
   .weather-details {
@@ -600,6 +627,15 @@ const getWindDirection = (deg?: number): string => {
   .sun-times {
     padding-left: 1.5rem;
     padding-right: 1.5rem;
+  }
+  
+  .forecast-button-container {
+    padding: 0 1.5rem 1.5rem;
+  }
+  
+  .forecast-button {
+    font-size: 0.9rem;
+    padding: 0.875rem 1.25rem;
   }
 }
 </style>
